@@ -1,20 +1,30 @@
 # Cybersecurity Lab Walkthroughs & Technical Portfolio
 
-A structured repository documenting hands-on laboratory exercises, technical research, and methodology notes developed across authorized cybersecurity training environments, primarily **Pentest Garage** and **INE Security**.
-
----
+A technical portfolio documenting hands-on cybersecurity labs, security research, practical notes, and assessment methodologies across authorized training environments.
 
 ## Overview
 
-This repository serves as a technical portfolio to document practical cybersecurity skills, maintain reproducible notes, and demonstrate a methodical approach to security assessments. Each walkthrough emphasizes understanding vulnerability concepts, recording verified commands, and identifying defensive remediation strategies.
+This repository organizes cybersecurity learning into structured, reproducible documentation. It focuses on understanding security concepts, documenting verified testing procedures, analyzing findings, and identifying appropriate remediation measures.
 
-### Key Objectives
+## Technical Focus Areas
 
-- **Standardized Documentation:** Record practical lab exercises using a structured, repeatable format.
-- **Methodology Development:** Develop systematic approaches to reconnaissance, enumeration, vulnerability validation, and remediation.
-- **Knowledge Reference:** Maintain practical cheat sheets covering commands, networking fundamentals, and security methodologies.
+- **Network Security:** TCP/IP, service enumeration, network reconnaissance, and packet analysis
+- **Web Application Security:** Common web vulnerabilities, input validation, authentication, and access-control concepts
+- **Linux Security:** Command-line operations, system enumeration, permissions, and security fundamentals
+- **Penetration Testing:** Reconnaissance, enumeration, vulnerability validation, evidence collection, and reporting
+- **Blue Team / SOC:** Security monitoring, log analysis, alert investigation, incident response, and SIEM fundamentals
 
----
+*Topics and tools are documented according to actual learning and hands-on progress.*
+
+## Tools & Technologies
+
+Tools used or explored in the learning environment include:
+
+- **Network Analysis:** Wireshark, Nmap
+- **Security Platforms:** Kali Linux
+- **SOC / SIEM:** Wazuh, Splunk
+- **Operating Systems:** Linux, Windows
+- **Documentation:** Git, GitHub, Markdown
 
 ## Repository Structure
 
@@ -34,48 +44,46 @@ cybersecurity-lab-walkthroughs/
     └── Walkthrough-Template.md
 ```
 
-### Directory Details
+## Navigation
 
-- [**Pentest-Garage/**](Pentest-Garage/README.md): Organized lab walkthroughs and challenge write-ups from the Pentest Garage platform.
-- [**INE/**](INE/README.md): Structured module walkthroughs and scenario notes from INE Security training courses.
-- **Notes/** — Practical cheat sheets, command references, and methodology frameworks:
-  - [Linux Commands](Notes/Linux-Commands.md): Command syntax and usage patterns for enumeration, system discovery, and privilege analysis.
-  - [Networking](Notes/Networking.md): Core networking models, common services, port references, and packet analysis principles.
-  - [Methodology](Notes/Methodology.md): A stage-by-stage guide to the penetration testing and security assessment lifecycle.
-- **Templates/** — Standardized templates for consistent documentation:
-  - [Walkthrough Template](Templates/Walkthrough-Template.md): A reusable format covering objectives, authorized scope, reconnaissance, enumeration, findings, verified commands, evidence, remediation, and lessons learned.
+- [Pentest Garage Walkthroughs](Pentest-Garage/README.md) — Lab notes and challenge documentation.
+- [INE Security Walkthroughs](INE/README.md) — Training module notes and lab documentation.
+- [Linux Commands](Notes/Linux-Commands.md) — Linux command references and practical usage.
+- [Networking Notes](Notes/Networking.md) — Networking fundamentals and common protocols.
+- [Assessment Methodology](Notes/Methodology.md) — A structured security assessment workflow.
+- [Walkthrough Template](Templates/Walkthrough-Template.md) — Reusable format for documenting labs.
 
----
+## Project Work
 
-## Documentation Standards
+### Real-Time SOC Monitoring & Automated Incident Detection Lab
 
-All walkthroughs follow the structure defined in [Templates/Walkthrough-Template.md](Templates/Walkthrough-Template.md).
+**Status:** In Progress
 
-The documentation follows these principles:
+Planned project work using Wazuh and a virtualized lab environment to explore security monitoring, endpoint event collection, alert investigation, and incident detection.
 
-- **Explicit Scope Definition:** Identify target systems and authorized boundaries before testing.
-- **Reproducibility:** Document exact commands, parameter configurations, and execution order.
-- **Evidence-Based Reporting:** Record observations, sanitized outputs, and root-cause analysis.
-- **Defensive Guidance:** Pair security findings with actionable remediation and hardening recommendations.
-- **Continuous Learning:** Document obstacles encountered and key takeaways from each scenario.
+Project documentation will be added as implementation and testing progress.
 
----
+## Lab Documentation Standards
 
-## Ethics, Scope & Responsible Disclosure
+Walkthroughs aim to include:
 
-> [!IMPORTANT]
-> **Ethical Disclaimer & Terms of Use**
->
-> All activities documented in this repository are intended to take place within authorized cybersecurity training environments provided by Pentest Garage and INE Security.
->
-> - **Authorization:** Testing is performed exclusively against targets explicitly permitted by the respective platform's terms of service.
-> - **Intellectual Property Protection:** Proprietary courseware, paid lab manuals, answer keys, and exact flags are not published in this repository.
-> - **Data Sanitization:** Published notes contain original analysis and sanitized commands. Sensitive credentials, production data, and proprietary infrastructure details are excluded.
-> - **Intended Use:** This material is provided for educational, portfolio, and research purposes, with an emphasis on technical learning and defensive remediation.
+- Objective and authorized scope
+- Lab environment and prerequisites
+- Reconnaissance and enumeration methodology
+- Verified commands and relevant outputs
+- Findings and technical explanations
+- Evidence and reproducible steps
+- Remediation recommendations
+- Lessons learned
 
----
+## Certifications & Training
 
-## Author & Focus Areas
+Training platforms and certification-related study notes may be documented here as relevant. Certification status should be listed accurately and only after the relevant credential has been earned.
 
-- **Repository:** `cybersecurity-lab-walkthroughs`
-- **Primary Focus Areas:** Network Penetration Testing, Web Application Security, System Hardening, and Vulnerability Assessment.
+## Ethics & Responsible Use
+
+- Perform testing only in environments where explicit authorization exists.
+- Follow the training platform's rules and assessment policies.
+- Do not publish credentials, sensitive data, proprietary course materials, answer keys, or restricted assessment content.
+- Sanitize identifying information from logs, screenshots, and command outputs.
+- Emphasize responsible reporting and defensive

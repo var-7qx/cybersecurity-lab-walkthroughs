@@ -1,0 +1,135 @@
+# ==============================================================================
+# Cybersecurity Lab Walkthroughs - Git Ignore Rules
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Secrets, Credentials, and Environment Files
+# ------------------------------------------------------------------------------
+*.env
+*.env.*
+*.env.local
+*.secret
+*.secrets
+*.token
+*.tokens
+*.credential
+*.credentials
+credentials.json
+creds.txt
+passwords.txt
+secrets/
+private/
+
+# ------------------------------------------------------------------------------
+# Cryptographic Keys, Certificates, and VPN Profiles
+# ------------------------------------------------------------------------------
+*.pem
+*.key
+*.pkcs12
+*.pfx
+*.p12
+*.crt
+*.cer
+*.der
+id_rsa
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+*.ppk
+*.kdbx
+*.ovpn
+*.wireguard
+
+# ------------------------------------------------------------------------------
+# Packet Captures, Memory Dumps, and Disk Images
+# ------------------------------------------------------------------------------
+*.pcap
+*.pcapng
+*.cap
+*.dmp
+*.dump
+*.raw
+*.core
+*.vmdk
+*.ova
+*.ovf
+*.qcow2
+*.iso
+*.vdi
+
+# ------------------------------------------------------------------------------
+# Wordlists, Dictionaries, and Rainbow Tables
+# ------------------------------------------------------------------------------
+wordlists/
+dictionaries/
+*.dict
+*.wordlist
+rockyou*
+
+# ------------------------------------------------------------------------------
+# Security Tool Outputs, Artifacts, and Databases
+# ------------------------------------------------------------------------------
+# Burp Suite
+*.burp
+burp.log
+
+# Hashcat & John the Ripper
+*.pot
+*.potfile
+john.rec
+john.local.conf
+
+# Responder & Impacket
+responder.db
+responder-session.log
+
+# BloodHound & Graph Databases
+*.json.zip
+
+# ------------------------------------------------------------------------------
+# Operating System Artifacts
+# ------------------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# ------------------------------------------------------------------------------
+# Editor and IDE Configurations
+# ------------------------------------------------------------------------------
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*.bak
+
+# ------------------------------------------------------------------------------
+# Runtime, Temporary, and Build Artifacts
+# ------------------------------------------------------------------------------
+*.tmp
+*.temp
+*.log
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+node_modules/
+

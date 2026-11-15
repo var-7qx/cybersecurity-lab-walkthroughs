@@ -38,6 +38,7 @@ Documentation focuses on:
 | Course / Track | Module / Domain | Lab Title | Core Focus | Status | Walkthrough |
 |---|---|---|---|---|---|
 | eJPT Track | Assessment Methodologies | Information Gathering CTF 1 | Web Reconnaissance & Info Disclosure | Completed | [Walkthrough](ejpt/Assessment%20Methodologies%20Information%20Gathering/README.md) |
+| eJPT Track | Assessment Methodologies | Footprinting & Scanning CTF 1 | Multi-Service Footprinting & Credential Pivoting | Completed | [Walkthrough](ejpt/Assessment%20Methodologies%20Footprinting%20&%20Scanning/README.md) |
 | eJPT Track | Host & Network Auditing | To be added | Service Enumeration | Planned | — |
 | eJPT Track | Web Application Pentest | To be added | Input Validation / Authentication Flaws | Planned | — |
 | eCPPT Track | Network & Infrastructure | To be added | Network Pivoting / Port Forwarding | Planned | — |

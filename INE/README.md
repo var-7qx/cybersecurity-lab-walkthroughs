@@ -43,6 +43,7 @@ Documentation focuses on:
 | eJPT Track | Assessment Methodologies | Vulnerability Assessment CTF 1 | Web Application Misconfigurations & Info Disclosure | Completed | [Walkthrough](ejpt/Assessment%20Methodologies%20Vulnerability%20Assessment%20CTF%201/README.md) |
 | eJPT Track | Host & Network Penetration Testing | System-Host Based Attacks CTF 1 | WebDAV Weaponization & SMB Administrative Compromise | Completed | [Walkthrough](ejpt/Host%20&%20Network%20Penetration%20Testing%20SystemHost%20Based%20Attacks/README.md) |
 | eJPT Track | Host & Network Penetration Testing | Exploitation CTF 1 | Web App RCE, Plugin Arbitrary File Read & System User Compromise | Completed | [Walkthrough](ejpt/Host%20&%20Network%20Penetration%20Testing%20Exploitation%20CTF1/README.md) |
+| eJPT Track | Host & Network Penetration Testing | Exploitation CTF 2 | SMB Brute-Force, NTLM Pass-the-Hash & Multi-Protocol Pivoting | Completed | [Walkthrough](ejpt/Host%20%26%20Network%20Penetration%20Testing%20Exploitation%20CTF2/README.md) |
 | eJPT Track | Host & Network Auditing | To be added | Service Enumeration | Planned | — |
 | eJPT Track | Web Application Pentest | To be added | Input Validation / Authentication Flaws | Planned | — |
 | eCPPT Track | Network & Infrastructure | To be added | Network Pivoting / Port Forwarding | Planned | — |

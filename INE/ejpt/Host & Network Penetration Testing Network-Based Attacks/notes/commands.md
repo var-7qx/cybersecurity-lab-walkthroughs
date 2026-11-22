@@ -1,4 +1,4 @@
-﻿# Command Reference: Host & Network Penetration Testing â€“ Network-Based Attacks CTF 1
+# Command Reference: Host & Network Penetration Testing â€“ Network-Based Attacks CTF 1
 
 This document provides a consolidated, categorized technical reference of all offensive commands executed during the **INE eJPT Host & Network Penetration Testing: Network-Based Attacks CTF 1** assessment. All commands are directly evidenced by terminal captures and logs generated throughout the engagement.
 

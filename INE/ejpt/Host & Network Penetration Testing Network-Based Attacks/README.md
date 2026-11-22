@@ -1,4 +1,4 @@
-﻿# Host & Network Penetration Testing: Network-Based Attacks CTF 1 â€” INE / eJPT Walkthrough
+# Host & Network Penetration Testing: Network-Based Attacks CTF 1 â€” INE / eJPT Walkthrough
 
 ---
 

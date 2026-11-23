@@ -46,6 +46,7 @@ Documentation focuses on:
 | eJPT Track | Host & Network Penetration Testing | Exploitation CTF 2 | SMB Brute-Force, NTLM Pass-the-Hash & Multi-Protocol Pivoting | Completed | [Walkthrough](ejpt/Host%20%26%20Network%20Penetration%20Testing%20Exploitation%20CTF2/README.md) |
 | eJPT Track | Host & Network Penetration Testing | Network-Based Attacks CTF 1 | Source Port Manipulation, SNMP Enumeration & Lateral File Server Pivot | Completed | [Walkthrough](ejpt/Host%20%26%20Network%20Penetration%20Testing%20Network-Based%20Attacks/README.md) |
 | eJPT Track | Host & Network Penetration Testing | The Metasploit Framework CTF 1 | MSSQL CLR Execution, SeImpersonatePrivilege & getsystem | Completed | [Walkthrough](ejpt/Host%20%26%20Network%20Penetration%20Testing%20The%20Metasploit%20Framework%20%28MSF%29/README.md) |
+| eJPT Track | Host & Network Penetration Testing | The Metasploit Framework CTF 2 | RSYNC Enumeration, Roxy-WI RCE & Cron Task Auditing | Completed | [Walkthrough](ejpt/Host%20%26%20Network%20Penetration%20Testing%20The%20Metasploit%20Framework%20%28MSF%29%20CTF%202/README.md) |
 | eJPT Track | Host & Network Auditing | To be added | Service Enumeration | Planned | — |
 | eJPT Track | Web Application Pentest | To be added | Input Validation / Authentication Flaws | Planned | — |
 | eCPPT Track | Network & Infrastructure | To be added | Network Pivoting / Port Forwarding | Planned | — |

